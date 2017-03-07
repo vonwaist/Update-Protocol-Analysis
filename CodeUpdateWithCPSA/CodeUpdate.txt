@@ -1,0 +1,193 @@
+(herald "Secure Code Update Protocol")
+
+(comment "CPSA 2.2.12")
+(comment "All input read from CodeUpdate.scm")
+
+(defprotocol CodeUpdate basic
+  (defrole verifier
+    (vars (idv idp name) (nv np c1 c2 text) (h1 h2 cupkg result data)
+      (k1 k2 skey))
+    (trace (send (cat idv c1 c2)) (recv (cat idp np h1 h2))
+      (send (cat nv (enc cupkg k1) (enc np idv idp h1 c1 h2 c2 k2)))
+      (recv (cat result (enc np nv idv idp h1 c1 h2 c2 result k2)))))
+  (defrole prover
+    (vars (idv idp name) (nv np c1 c2 text) (h1 h2 cupkg result data)
+      (k1 k2 skey))
+    (trace (recv (cat idv c1 c2)) (send (cat idp np h1 h2))
+      (recv (cat nv (enc cupkg k1) (enc np idv idp h1 c1 h2 c2 k2)))
+      (send (cat result (enc np nv idv idp h1 c1 h2 c2 result k2)))))
+  (comment "Secure Code Update Protocol Definition"))
+
+(defskeleton CodeUpdate
+  (vars (nv np c1 c2 text) (h1 h2 result cupkg data) (idv idp name)
+    (k2 k1 skey))
+  (defstrand verifier 4 (nv nv) (np np) (c1 c1) (c2 c2) (h1 h1) (h2 h2)
+    (cupkg cupkg) (result result) (idv idv) (idp idp) (k1 k1) (k2 k2))
+  (non-orig k2)
+  (uniq-orig nv c1 c2)
+  (comment "Authentication from the verifier's perspective")
+  (traces
+    ((send (cat idv c1 c2)) (recv (cat idp np h1 h2))
+      (send (cat nv (enc cupkg k1) (enc np idv idp h1 c1 h2 c2 k2)))
+      (recv (cat result (enc np nv idv idp h1 c1 h2 c2 result k2)))))
+  (label 0)
+  (unrealized (0 3))
+  (origs (nv (0 2)) (c1 (0 0)) (c2 (0 0)))
+  (comment "1 in cohort - 1 not yet seen"))
+
+(defskeleton CodeUpdate
+  (vars (nv np c1 c2 text) (h1 h2 result cupkg cupkg-0 data)
+    (idv idp name) (k2 k1 k1-0 skey))
+  (defstrand verifier 4 (nv nv) (np np) (c1 c1) (c2 c2) (h1 h1) (h2 h2)
+    (cupkg cupkg) (result result) (idv idv) (idp idp) (k1 k1) (k2 k2))
+  (defstrand prover 4 (nv nv) (np np) (c1 c1) (c2 c2) (h1 h1) (h2 h2)
+    (cupkg cupkg-0) (result result) (idv idv) (idp idp) (k1 k1-0)
+    (k2 k2))
+  (precedes ((0 0) (1 0)) ((0 2) (1 2)) ((1 3) (0 3)))
+  (non-orig k2)
+  (uniq-orig nv c1 c2)
+  (operation encryption-test (added-strand prover 4)
+    (enc np nv idv idp h1 c1 h2 c2 result k2) (0 3))
+  (traces
+    ((send (cat idv c1 c2)) (recv (cat idp np h1 h2))
+      (send (cat nv (enc cupkg k1) (enc np idv idp h1 c1 h2 c2 k2)))
+      (recv (cat result (enc np nv idv idp h1 c1 h2 c2 result k2))))
+    ((recv (cat idv c1 c2)) (send (cat idp np h1 h2))
+      (recv (cat nv (enc cupkg-0 k1-0) (enc np idv idp h1 c1 h2 c2 k2)))
+      (send (cat result (enc np nv idv idp h1 c1 h2 c2 result k2)))))
+  (label 1)
+  (parent 0)
+  (unrealized)
+  (shape)
+  (maps
+    ((0)
+      ((idv idv) (idp idp) (nv nv) (np np) (c1 c1) (c2 c2) (h1 h1)
+        (h2 h2) (result result) (k2 k2) (cupkg cupkg) (k1 k1))))
+  (origs (nv (0 2)) (c1 (0 0)) (c2 (0 0))))
+
+(comment "Nothing left to do")
+
+(defprotocol CodeUpdate basic
+  (defrole verifier
+    (vars (idv idp name) (nv np c1 c2 text) (h1 h2 cupkg result data)
+      (k1 k2 skey))
+    (trace (send (cat idv c1 c2)) (recv (cat idp np h1 h2))
+      (send (cat nv (enc cupkg k1) (enc np idv idp h1 c1 h2 c2 k2)))
+      (recv (cat result (enc np nv idv idp h1 c1 h2 c2 result k2)))))
+  (defrole prover
+    (vars (idv idp name) (nv np c1 c2 text) (h1 h2 cupkg result data)
+      (k1 k2 skey))
+    (trace (recv (cat idv c1 c2)) (send (cat idp np h1 h2))
+      (recv (cat nv (enc cupkg k1) (enc np idv idp h1 c1 h2 c2 k2)))
+      (send (cat result (enc np nv idv idp h1 c1 h2 c2 result k2)))))
+  (comment "Secure Code Update Protocol Definition"))
+
+(defskeleton CodeUpdate
+  (vars (np c1 c2 nv text) (h1 h2 cupkg data) (idv idp name)
+    (k2 k1 skey))
+  (defstrand prover 3 (nv nv) (np np) (c1 c1) (c2 c2) (h1 h1) (h2 h2)
+    (cupkg cupkg) (idv idv) (idp idp) (k1 k1) (k2 k2))
+  (non-orig k2)
+  (uniq-orig np)
+  (comment "Authentication from the prover's perspective")
+  (traces
+    ((recv (cat idv c1 c2)) (send (cat idp np h1 h2))
+      (recv (cat nv (enc cupkg k1) (enc np idv idp h1 c1 h2 c2 k2)))))
+  (label 2)
+  (unrealized (0 2))
+  (origs (np (0 1)))
+  (comment "1 in cohort - 1 not yet seen"))
+
+(defskeleton CodeUpdate
+  (vars (np c1 c2 nv nv-0 text) (h1 h2 cupkg cupkg-0 data)
+    (idv idp name) (k2 k1 k1-0 skey))
+  (defstrand prover 3 (nv nv) (np np) (c1 c1) (c2 c2) (h1 h1) (h2 h2)
+    (cupkg cupkg) (idv idv) (idp idp) (k1 k1) (k2 k2))
+  (defstrand verifier 3 (nv nv-0) (np np) (c1 c1) (c2 c2) (h1 h1)
+    (h2 h2) (cupkg cupkg-0) (idv idv) (idp idp) (k1 k1-0) (k2 k2))
+  (precedes ((0 1) (1 1)) ((1 2) (0 2)))
+  (non-orig k2)
+  (uniq-orig np)
+  (operation encryption-test (added-strand verifier 3)
+    (enc np idv idp h1 c1 h2 c2 k2) (0 2))
+  (traces
+    ((recv (cat idv c1 c2)) (send (cat idp np h1 h2))
+      (recv (cat nv (enc cupkg k1) (enc np idv idp h1 c1 h2 c2 k2))))
+    ((send (cat idv c1 c2)) (recv (cat idp np h1 h2))
+      (send
+        (cat nv-0 (enc cupkg-0 k1-0) (enc np idv idp h1 c1 h2 c2 k2)))))
+  (label 3)
+  (parent 2)
+  (unrealized)
+  (shape)
+  (maps
+    ((0)
+      ((idv idv) (idp idp) (np np) (c1 c1) (c2 c2) (h1 h1) (h2 h2)
+        (k2 k2) (nv nv) (cupkg cupkg) (k1 k1))))
+  (origs (np (0 1))))
+
+(comment "Nothing left to do")
+
+(defprotocol CodeUpdate basic
+  (defrole verifier
+    (vars (idv idp name) (nv np c1 c2 text) (h1 h2 cupkg result data)
+      (k1 k2 skey))
+    (trace (send (cat idv c1 c2)) (recv (cat idp np h1 h2))
+      (send (cat nv (enc cupkg k1) (enc np idv idp h1 c1 h2 c2 k2)))
+      (recv (cat result (enc np nv idv idp h1 c1 h2 c2 result k2)))))
+  (defrole prover
+    (vars (idv idp name) (nv np c1 c2 text) (h1 h2 cupkg result data)
+      (k1 k2 skey))
+    (trace (recv (cat idv c1 c2)) (send (cat idp np h1 h2))
+      (recv (cat nv (enc cupkg k1) (enc np idv idp h1 c1 h2 c2 k2)))
+      (send (cat result (enc np nv idv idp h1 c1 h2 c2 result k2)))))
+  (comment "Secure Code Update Protocol Definition"))
+
+(defskeleton CodeUpdate
+  (vars (nv np c1 c2 text) (h1 h2 cupkg result data) (idv idp name)
+    (k1 k2 skey))
+  (defstrand prover 4 (nv nv) (np np) (c1 c1) (c2 c2) (h1 h1) (h2 h2)
+    (cupkg cupkg) (result result) (idv idv) (idp idp) (k1 k1) (k2 k2))
+  (non-orig k1)
+  (comment "Secrecy from the prover's perspective")
+  (traces
+    ((recv (cat idv c1 c2)) (send (cat idp np h1 h2))
+      (recv (cat nv (enc cupkg k1) (enc np idv idp h1 c1 h2 c2 k2)))
+      (send (cat result (enc np nv idv idp h1 c1 h2 c2 result k2)))))
+  (label 4)
+  (unrealized (0 2))
+  (origs)
+  (comment "1 in cohort - 1 not yet seen"))
+
+(defskeleton CodeUpdate
+  (vars (nv np c1 c2 nv-0 np-0 c1-0 c2-0 text)
+    (h1 h2 cupkg result h1-0 h2-0 data) (idv idp idv-0 idp-0 name)
+    (k1 k2 k2-0 skey))
+  (defstrand prover 4 (nv nv) (np np) (c1 c1) (c2 c2) (h1 h1) (h2 h2)
+    (cupkg cupkg) (result result) (idv idv) (idp idp) (k1 k1) (k2 k2))
+  (defstrand verifier 3 (nv nv-0) (np np-0) (c1 c1-0) (c2 c2-0)
+    (h1 h1-0) (h2 h2-0) (cupkg cupkg) (idv idv-0) (idp idp-0) (k1 k1)
+    (k2 k2-0))
+  (precedes ((1 2) (0 2)))
+  (non-orig k1)
+  (operation encryption-test (added-strand verifier 3) (enc cupkg k1)
+    (0 2))
+  (traces
+    ((recv (cat idv c1 c2)) (send (cat idp np h1 h2))
+      (recv (cat nv (enc cupkg k1) (enc np idv idp h1 c1 h2 c2 k2)))
+      (send (cat result (enc np nv idv idp h1 c1 h2 c2 result k2))))
+    ((send (cat idv-0 c1-0 c2-0)) (recv (cat idp-0 np-0 h1-0 h2-0))
+      (send
+        (cat nv-0 (enc cupkg k1)
+          (enc np-0 idv-0 idp-0 h1-0 c1-0 h2-0 c2-0 k2-0)))))
+  (label 5)
+  (parent 4)
+  (unrealized)
+  (shape)
+  (maps
+    ((0)
+      ((idv idv) (idp idp) (nv nv) (np np) (c1 c1) (c2 c2) (h1 h1)
+        (h2 h2) (cupkg cupkg) (k1 k1) (result result) (k2 k2))))
+  (origs))
+
+(comment "Nothing left to do")
